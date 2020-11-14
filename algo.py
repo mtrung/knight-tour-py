@@ -1,125 +1,76 @@
-from board import LogicsBoard, BoardPosition
+from board import Board, BoardPosition
 
 
 class Algorithm:
     def __init__(self, row=8, col=8):
-        self.rowCount = row
-        self.colCount = col
-        self.m_logicsBoard = LogicsBoard(row, col)
-
-    def SetIndex(self, c, index):
-        self.m_logicsBoard.GetPos(c).MoveIndex = index
-
-    def GetIndex(self, c):
-        return self.m_logicsBoard.GetPos(c).MoveIndex
-
-    # def Init(self):
-        #    for (i=1 i <= rowCount i++):
-        #        for (j=1 j <= colCount j++):
-        #            m_logicsBoard.GetPos(i, j).SetUnoccupied()
-
-        # initialize the m_possibleMovesMatrix array
-        # for (i=1 i <= rowCount i++):
-        #     for (j=1 j <= colCount j++):
-        #         PointI p = new PointI(i, j)
-        #             m_logicsBoard.GetPos(
-        #                 i, j).PossibleMovesCount = GetPossibleMovesCount(p)
-
-    # def GetPossibleMovesCount(self, curr):
-    #    return m_logicsBoard.GetPossibleMoves(curr).Count
-
-    def DetermineNextMove(self, curr):
-        # There can be multiple cells with the same lowest move count: up to 8
-        # get smallest possible move count array for level 1
-        L1Candidates = self.GetSmallestAccessArray(curr)
-        if not L1Candidates:
-            return -1
-
-        if len(L1Candidates) == 1:
-            return L1Candidates[0]
-
-        # level 2 forward check
-        smallestAccessValIndex_Level1 = 0
-        candidatePos = L1Candidates[smallestAccessValIndex_Level1]
-        smallestAccessVal_Level1 = candidatePos.PossibleMovesCount
-
-        # designate 1st one is the smallest
-        smallestAccessVal_Level2 = self.GetSmallestAccessVal(candidatePos)
-
-        candidate_smallestAccessVal_Level2 = -1
-        # for (level1_i=1 level1_i < L1Candidates.Count level1_i++):
-        for i, item in enumerate(L1Candidates):
-            candidate_smallestAccessVal_Level2 = self.GetSmallestAccessVal(
-                L1Candidates[i])
-            # if the level 2
-            if (smallestAccessVal_Level2 > candidate_smallestAccessVal_Level2):
-                smallestAccessValIndex_Level1 = i
-                smallestAccessVal_Level2 = candidate_smallestAccessVal_Level2
-
-        return L1Candidates[smallestAccessValIndex_Level1]
-
-    def UpdateAccessibility(self, curr):
-        PossiblePos = self.GetPossibleMovePositions(curr)
-        for p in PossiblePos:
-            p.PossibleMovesCount += -1
-
-    def GetPossibleMovePositions(self, curr) -> list:
-        PossiblePoints = self.m_logicsBoard.GetPossibleMoves(curr)
-        # PossiblePos = []
-        # for p in PossiblePoints:
-        #    PossiblePos.Add(m_logicsBoard.GetPos(p))
-        return PossiblePoints
-
-    def GetSmallestAccess(self, Positions: list):
-        if not Positions:
-            return -1
-        # smallestIndex = 0
-        sortedList = sorted(Positions, key=lambda pos: pos.PossibleMovesCount)
-        # for i, pos in enumerate(Positions):
-        #     if (pos.PossibleMovesCount < Positions[smallestIndex].PossibleMovesCount):
-        #         smallestIndex = i
-        # smallestValue = Positions[smallestIndex].PossibleMovesCount
-        return sortedList[0].PossibleMovesCount
-
-    def GetSmallestAccessVal(self, curr):
-        # Get all possible moves from a given position
-        Positions = self.GetPossibleMovePositions(curr)
-        return self.GetSmallestAccess(Positions)
-
-    def GetSmallestAccessArray(self, curr) -> list:
-        # Get all possible moves from a given position
-        Positions = self.GetPossibleMovePositions(curr)
-        if not Positions:
-            return
-        # Get the smallest value
-        smallest = self.GetSmallestAccess(Positions)
-        # Remove non-smallest positions
-        # for (i=0 i < Positions.Count i++):
-        # if (Positions[i].PossibleMovesCount > smallestValue):
-        #         Positions.RemoveAt(i)
-        #         i--
-        # return Positions
-        return [p for p in Positions if p.PossibleMovesCount <= smallest]
-
-    def moveNext(self, curr):
-        possibleMoves = self.m_logicsBoard.GetPossibleMoves(curr)
-        if len(possibleMoves) == 0:
-            return
-        boardindex = self.GetIndex(curr)
-        self.UpdateAccessibility(curr)
-        curr = self.DetermineNextMove(curr)
-        self.SetIndex(curr, boardindex + 1)
-        return curr
+        self.board = Board(row, col)
 
     def solve(self, x, y):
-        curr = BoardPosition(x, y)
-        self.SetIndex(curr, 1)
+        curr = self.placeAt(x, y)
         while True:
-            curr = self.moveNext(curr)
+            curr = self.move(curr)
             if not curr:
                 return
+        return True
+
+    def placeAt(self, x, y, index=None):
+        pos = self.board.getMeta(x, y)
+        pos.moveIndex = index if index else pos.moveIndex+1
+        return pos
+
+    def calcNextMove(self, curr):
+        # There can be multiple neighbors with the same lowest accessibility: up to 8
+        # get smallest_l2 possible move count array for level 1
+        neighbors = self.getSmallestAccessibilityList(curr)
+        if not neighbors:
+            return
+        if len(neighbors) == 1:
+            return neighbors[0]
+
+        chosenNeighbor = None
+        smallest_l2 = 8
+        for neighbor in neighbors:
+            neighbor_l2 = self.getSmallestAccessibility(neighbor)
+            if (smallest_l2 > neighbor_l2):
+                smallest_l2 = neighbor_l2
+                chosenNeighbor = neighbor
+        return chosenNeighbor
+
+    def updateAccessibility(self, curr):
+        moves = self.getValidMoves(curr)
+        for move in moves:
+            move.PossibleMovesCount -= 1
+
+    def getValidMoves(self, curr, toSort=False) -> list:
+        l = self.board.getValidMoves(curr)
+        return l if not toSort or not l else sorted(l, key=lambda pos: pos.PossibleMovesCount)
+
+    def getSmallestAccessibility(self, curr) -> int:
+        # Returns the lowest accessibility value from a given position
+        validMoves = self.getValidMoves(curr, toSort=True)
+        if not validMoves:
+            return
+        return validMoves[0].PossibleMovesCount
+
+    def getSmallestAccessibilityList(self, curr) -> list:
+        # Return the lowest accessibility moves from a given position
+        validMoves = self.getValidMoves(curr, toSort=True)
+        if not validMoves:
+            return
+        smallest_l2 = validMoves[0].PossibleMovesCount
+        return [move for move in validMoves if move.PossibleMovesCount <= smallest_l2]
+
+    def move(self, curr):
+        possibleMoves = self.board.getValidMoves(curr)
+        if len(possibleMoves) == 0:
+            return
+        boardindex = curr.moveIndex
+        self.updateAccessibility(curr)
+        curr = self.calcNextMove(curr)
+        curr.moveIndex = boardindex+1
+        return curr
 
 
 algo = Algorithm()
-algo.solve(1, 1)
-print(algo.m_logicsBoard.toMdStr())
+algo.solve(2, 2)
+print(algo.board.toMdStr())
