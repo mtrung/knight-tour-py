@@ -18,10 +18,10 @@ class Algorithm:
         pos.moveIndex = index if index else pos.moveIndex+1
         return pos
 
-    def calcNextMove(self, curr):
+    def calcNextMove(self, neighbors):
         # There can be multiple neighbors with the same lowest accessibility: up to 8
         # get smallest_l2 possible move count array for level 1
-        neighbors = self.getSmallestAccessibilityList(curr)
+        neighbors = self.getLowestScoreNeighbors(neighbors)
         if not neighbors:
             return
         if len(neighbors) == 1:
@@ -30,44 +30,44 @@ class Algorithm:
         chosenNeighbor = None
         smallest_l2 = 8
         for neighbor in neighbors:
-            neighbor_l2 = self.getSmallestAccessibility(neighbor)
+            neighbor_l2 = self.getNeighborLowestScore(neighbor)
             if (smallest_l2 > neighbor_l2):
                 smallest_l2 = neighbor_l2
                 chosenNeighbor = neighbor
         return chosenNeighbor
 
-    def updateAccessibility(self, curr):
+    def updateNeighborScores(self, curr):
         moves = self.getValidMoves(curr)
+        if not moves:
+            return
         for move in moves:
-            move.PossibleMovesCount -= 1
+            move.score -= 1
+        return moves
 
-    def getValidMoves(self, curr, toSort=False) -> list:
+    def getValidMoves(self, curr, toSort=True) -> list:
         l = self.board.getValidMoves(curr)
-        return l if not toSort or not l else sorted(l, key=lambda pos: pos.PossibleMovesCount)
+        return l if not toSort or not l else sorted(l, key=lambda pos: pos.score)
 
-    def getSmallestAccessibility(self, curr) -> int:
+    def getNeighborLowestScore(self, curr) -> int:
         # Returns the lowest accessibility value from a given position
-        validMoves = self.getValidMoves(curr, toSort=True)
+        validMoves = self.getValidMoves(curr)
         if not validMoves:
             return
-        return validMoves[0].PossibleMovesCount
+        return validMoves[0].score
 
-    def getSmallestAccessibilityList(self, curr) -> list:
+    def getLowestScoreNeighbors(self, neighbors) -> list:
         # Return the lowest accessibility moves from a given position
-        validMoves = self.getValidMoves(curr, toSort=True)
-        if not validMoves:
-            return
-        smallest_l2 = validMoves[0].PossibleMovesCount
-        return [move for move in validMoves if move.PossibleMovesCount <= smallest_l2]
+        # assume neighbors list is sorted
+        smallest_l2 = neighbors[0].score
+        return [move for move in neighbors if move.score <= smallest_l2]
 
     def move(self, curr):
-        possibleMoves = self.board.getValidMoves(curr)
-        if len(possibleMoves) == 0:
+        neighbors = self.updateNeighborScores(curr)
+        if not neighbors:
             return
-        boardindex = curr.moveIndex
-        self.updateAccessibility(curr)
-        curr = self.calcNextMove(curr)
-        curr.moveIndex = boardindex+1
+        moveIndex = curr.moveIndex
+        curr = self.calcNextMove(neighbors)
+        curr.moveIndex = moveIndex+1
         return curr
 
 
