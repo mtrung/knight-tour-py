@@ -19,8 +19,10 @@ class Algorithm:
         return pos
 
     def calcNextMove(self, neighbors):
-        # There can be multiple neighbors with the same lowest accessibility: up to 8
-        # get smallest_l2 possible move count array for level 1
+        # There can be multiple neighbors with the same lowest score: up to 8
+        # Breaking tie is important
+        # Forward looking to next neighbor
+        # get lowestNextNeighborScore possible move count array for level 1
         neighbors = self.getLowestScoreNeighbors(neighbors)
         if not neighbors:
             return
@@ -28,11 +30,11 @@ class Algorithm:
             return neighbors[0]
 
         chosenNeighbor = None
-        smallest_l2 = 8
+        lowestNextNeighborScore = 8
         for neighbor in neighbors:
-            neighbor_l2 = self.getNeighborLowestScore(neighbor)
-            if (smallest_l2 > neighbor_l2):
-                smallest_l2 = neighbor_l2
+            nextNeighborScore = self.getNeighborLowestScore(neighbor)
+            if (lowestNextNeighborScore > nextNeighborScore):
+                lowestNextNeighborScore = nextNeighborScore
                 chosenNeighbor = neighbor
         return chosenNeighbor
 
@@ -58,8 +60,8 @@ class Algorithm:
     def getLowestScoreNeighbors(self, neighbors) -> list:
         # Return the lowest accessibility moves from a given position
         # assume neighbors list is sorted
-        smallest_l2 = neighbors[0].score
-        return [move for move in neighbors if move.score <= smallest_l2]
+        lowestNextNeighborScore = neighbors[0].score
+        return [move for move in neighbors if move.score <= lowestNextNeighborScore]
 
     def move(self, curr):
         neighbors = self.updateNeighborScores(curr)
