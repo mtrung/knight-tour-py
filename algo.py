@@ -1,22 +1,32 @@
-from board import Board, BoardPosition
+from board import Board
+import random
 
 
 class Algorithm:
     def __init__(self, row=8, col=8):
-        self.board = Board(row, col)
+        self.rowCount = row
+        self.colCount = col
+        self.board = None
+        self.curr = None
+
+    def __str__(self) -> str:
+        return str(self.board) if self.board else ''
 
     def solve(self, x, y):
-        curr = self.placeAt(x, y)
-        while True:
-            curr = self.move(curr)
-            if not curr:
-                return
+        self.placeAt(x, y)
+        while self.move():
+            pass
         return True
 
-    def placeAt(self, x, y, index=None):
-        pos = self.board.getMeta(x, y)
-        pos.moveIndex = index if index else pos.moveIndex+1
-        return pos
+    def placeAt(self, x=None, y=None, index=None):
+        if not x:
+            x = random.randint(1, 8)
+            y = random.randint(1, 8)
+        self.board = Board(self.rowCount, self.colCount)
+        self.curr = self.board.getMeta(x, y)
+        self.curr.hightlight = True
+        self.curr.moveIndex = index if index else 1
+        return self.curr
 
     def calcNextMove(self, neighbors):
         # There can be multiple neighbors with the same lowest score: up to 8
@@ -39,20 +49,16 @@ class Algorithm:
         return chosenNeighbor
 
     def updateNeighborScores(self, curr):
-        moves = self.getValidMoves(curr)
-        if not moves:
+        validMoves = self.board.getValidMoves(curr)
+        if not validMoves:
             return
-        for move in moves:
+        for move in validMoves:
             move.score -= 1
-        return moves
-
-    def getValidMoves(self, curr, toSort=True) -> list:
-        l = self.board.getValidMoves(curr)
-        return l if not toSort or not l else sorted(l, key=lambda pos: pos.score)
+        return validMoves
 
     def getNeighborLowestScore(self, curr) -> int:
         # Returns the lowest accessibility value from a given position
-        validMoves = self.getValidMoves(curr)
+        validMoves = self.board.getValidMoves(curr)
         if not validMoves:
             return
         return validMoves[0].score
@@ -63,16 +69,21 @@ class Algorithm:
         lowestNextNeighborScore = neighbors[0].score
         return [move for move in neighbors if move.score <= lowestNextNeighborScore]
 
-    def move(self, curr):
-        neighbors = self.updateNeighborScores(curr)
+    def move(self):
+        if not self.curr:
+            return
+        neighbors = self.updateNeighborScores(self.curr)
         if not neighbors:
             return
-        moveIndex = curr.moveIndex
-        curr = self.calcNextMove(neighbors)
-        curr.moveIndex = moveIndex+1
-        return curr
+        moveIndex = self.curr.moveIndex
+        if moveIndex != 1:
+            self.curr.hightlight = False
+        self.curr = self.calcNextMove(neighbors)
+        self.curr.moveIndex = moveIndex + 1
+        self.curr.hightlight = True
+        return self.curr
 
 
 algo = Algorithm()
 algo.solve(2, 2)
-print(algo.board.toMdStr())
+print(algo)

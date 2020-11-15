@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+   <!-- custom style sheet -->
+   <!-- <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootswatch/4.5.2/cerulean/bootstrap.min.css" integrity="sha384-3fdgwJw17Bi87e1QQ4fsLn4rUFqWw//KU0g8TvV6quvahISRewev6/EocKNuJmEw" crossorigin="anonymous"> -->
+   <!-- <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootswatch/4.5.2/materia/bootstrap.min.css" integrity="sha384-B4morbeopVCSpzeC1c4nyV0d0cqvlSAfyXVfrPJa25im5p+yEN/YmhlgQP/OyMZD" crossorigin="anonymous">   -->
+</head>
+<body>
+   <!-- Theme: spacelab, united, cerulean, Cyborg, Darkly, Lumen, Paper, Simplex ...
+   check out more themes at https://bootswatch.com/default/ -->
+<textarea theme="cerulean">
+{{ mdStr }}
+</textarea>
+   <script language="javascript">
+      function eventHandler(event) {
+         // console.log("<< "+event.data.length+": "+event.data);
+         json = JSON.parse(event.data);
+         // console.log(json.content);
+         // convert markdown to html
+         var html = marked(json.content);
+         // console.log(html);
+         document.getElementById("content").innerHTML = html;
+         
+         // beautify table tag
+         var parts = document.getElementsByTagName("table");
+         for (i=0; i < parts.length; i++) {
+            var part = parts[i];
+            part.className = "table table-striped table-bordered";
+         }
+      }
+      var evtSource = new EventSource("{{base_url}}");
+      evtSource.addEventListener("message", eventHandler);
+   </script>
+   <script type="text/javascript" src="https://cdn.jsdelivr.net/gh/Naereen/StrapDown.js@master/strapdown.min.js">
+   </script>
+</body>
+</html>
