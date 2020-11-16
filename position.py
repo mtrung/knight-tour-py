@@ -23,7 +23,11 @@ class Position:
 
     def __str__(self):
         if False:
+            # debug
             return f'{self.moveIndex},{self.score}'
         if self.moveIndex == 0:
-            return ''
-        return f'**{self.moveIndex}**' if self.hightlight else str(self.moveIndex)
+            return '![0](https://upload.wikimedia.org/wikipedia/commons/f/f9/Reversi_OOt45.svg)'
+        elif self.moveIndex == 1:
+            return f'![{self.moveIndex}](https://upload.wikimedia.org/wikipedia/commons/7/70/Chess_nlt45.svg)'
+        hl = f'![{self.moveIndex}](https://upload.wikimedia.org/wikipedia/commons/c/c8/Chess_ndl45.svg)'
+        return hl if self.hightlight else str(self.moveIndex)
