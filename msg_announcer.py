@@ -33,3 +33,6 @@ class MessageAnnouncer:
 
     def announceSse(self, data: str, event=None):
         self.announce(format_sse(data, event))
+
+
+announcer = MessageAnnouncer()
