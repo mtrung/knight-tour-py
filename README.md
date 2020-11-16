@@ -4,12 +4,8 @@
   Knight's Tour problem, originally proposed by the mathematician Euler.
   The question is: Can the chess piece called the knight move around
   an empty chessboard and touch each of the 64 squares once and only once?
--
-- To solve, this program uses Warnsdorf's rule http://en.wikipedia.org/wiki/Knight%27s_tour
 
-- An array 9x9 will be created to simulate the chessboard, subscript 0 will
-  be reserved for further development. Put a 1 in the first square you move
-  to, a 2 in the second square, a 3 in the third...
+- To solve, this program uses Warnsdorf's rule http://en.wikipedia.org/wiki/Knight%27s_tour
 
 - Each potential move will be tested to make sure it doesn't land off the
   board and doesn't revisit the old move.
