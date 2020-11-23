@@ -24,7 +24,7 @@ class Algorithm:
             y = random.randint(1, 8)
         self.board = Board(self.rowCount, self.colCount)
         self.curr = self.board.getMeta(x, y)
-        self.curr.hightlight = True
+        self.curr.highlight = True
         self.curr.moveIndex = index if index else 1
         return self.curr
 
@@ -77,10 +77,10 @@ class Algorithm:
             return
         moveIndex = self.curr.moveIndex
         if moveIndex != 1:
-            self.curr.hightlight = False
+            self.curr.highlight = False
         self.curr = self.calcNextMove(neighbors)
         self.curr.moveIndex = moveIndex + 1
-        self.curr.hightlight = True
+        self.curr.highlight = True
         return self.curr
 
 
