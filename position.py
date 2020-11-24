@@ -13,9 +13,10 @@ def setPieceStyle(useIndex):
     global positionValues
     if useIndex:
         positionValues = {
+            # https://en.wikipedia.org/wiki/Chess_symbols_in_Unicode
             'empty': '',
             'highlight': '♞',
-            '1st': '♞',
+            '1st': '△',
             'visited': '♘',
         }
     else:
@@ -26,7 +27,7 @@ def setPieceStyle(useIndex):
             'visited': '![](https://upload.wikimedia.org/wikipedia/commons/7/70/Chess_nlt45.svg)'
         }
 
-# setPieceStyle(False)
+setPieceStyle(True)
 
 class Position:
     def __init__(self, x, y):
